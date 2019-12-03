@@ -2,7 +2,7 @@ name: $(BuildDefinitionName)_$(SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
 
 variables:
   mavenPomFile : 'pom.xml'
-  funcAppName: ''
+  funcAppName: 'azfuncjava-20191202091427916'
   #MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
@@ -32,6 +32,7 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     goals: 'package'
+    mavenOptions: '--batch-mode'
 #    options: '$(MAVEN_OPTS)'
 
 - task: ArchiveFiles@2
