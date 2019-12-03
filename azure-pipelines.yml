@@ -3,6 +3,8 @@ name: $(BuildDefinitionName)_$(SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
 variables:
   mavenPomFile : 'pom.xml'
   funcAppName: 'azfuncjava-20191202091427916'
+  location: 'Westeurope'
+  #serviceConnection: ''
   #MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
@@ -44,3 +46,13 @@ steps:
 
 - publish: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip'
   artifact: FunctionApp
+
+- task: AzureResourceGroupDeployment@2
+  inputs:
+    action: Create Or Update Resource Group
+    location: $(location)
+    azureSubscription: $(serviceConnection)
+    resourceGroupName: '$(funcAppName)-rg'
+    templateLocation: Linked artifact
+    csmFile: 'azuredeploy.json'
+    csmParametersFile: 'azuredeploy.parameters.json'
