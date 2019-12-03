@@ -2,7 +2,7 @@ name: $(BuildDefinitionName)_$(SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
 
 variables:
   mavenPomFile : 'pom.xml'
-  funcAppName: 'azfuncjava-20191202091427916'
+  funcAppName: 'azurefunctionsjavacicd'
   location: 'Westeurope'
   #serviceConnection: ''
   #MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
