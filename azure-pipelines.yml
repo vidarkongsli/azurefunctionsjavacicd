@@ -56,3 +56,10 @@ steps:
     templateLocation: Linked artifact
     csmFile: 'azuredeploy.json'
     csmParametersFile: 'azuredeploy.parameters.json'
+
+- task: AzureFunctionApp@1
+  inputs:
+    azureSubscription: $(serviceConnection)
+    appType: functionApp
+    appName: $(funcAppName)
+    package: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip'
