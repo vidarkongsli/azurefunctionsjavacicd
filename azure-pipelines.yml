@@ -32,7 +32,7 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     goals: 'package'
-    mavenOptions: '--batch-mode'
+    options: '--batch-mode'
 #    options: '$(MAVEN_OPTS)'
 
 - task: ArchiveFiles@2
