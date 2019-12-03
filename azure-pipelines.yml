@@ -26,6 +26,7 @@ steps:
 #      maven
 #    path: $(MAVEN_CACHE_FOLDER)
 - task: Maven@3
+  displayName: Build function
   inputs:
     mavenPomFile: $(mavenPomFile)
     javaHomeOption: 'JDKVersion'
@@ -38,6 +39,7 @@ steps:
 #    options: '$(MAVEN_OPTS)'
 
 - task: ArchiveFiles@2
+  displayName: Create zipped package
   inputs:
     rootFolderOrFile: 'target/azure-functions/$(funcAppName)'
     includeRootFolder: false 
@@ -48,6 +50,7 @@ steps:
   artifact: FunctionApp
 
 - task: AzureResourceGroupDeployment@2
+  displayName: Provision Azure infrastructure
   inputs:
     action: Create Or Update Resource Group
     location: $(location)
@@ -58,6 +61,7 @@ steps:
     csmParametersFile: 'azuredeploy.parameters.json'
 
 - task: AzureFunctionApp@1
+  displayName: Deploy function app
   inputs:
     azureSubscription: $(serviceConnection)
     appType: functionApp
