@@ -39,7 +39,7 @@ steps:
 #    options: '$(MAVEN_OPTS)'
 - task: PublishTestResults@2
   inputs:
-    testResultsFiles: '**/TESTS-*.xml'
+    testResultsFiles: '**/TEST-*.xml'
 - task: ArchiveFiles@2
   displayName: Create zipped package
   inputs:
