@@ -37,7 +37,9 @@ steps:
     goals: 'package'
     options: '--batch-mode -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 #    options: '$(MAVEN_OPTS)'
-
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/TESTS-*.xml'
 - task: ArchiveFiles@2
   displayName: Create zipped package
   inputs:
