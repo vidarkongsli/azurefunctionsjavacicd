@@ -5,7 +5,7 @@ variables:
   funcAppName: 'azurefunctionsjavacicd'
   location: 'Westeurope'
   #serviceConnection: ''
-  #MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
 trigger:
@@ -17,14 +17,14 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-#- task: CacheBeta@0
-#  displayName: Cache Maven local repo
-#  inputs:
-#    key: 'maven | "$(Agent.OS)" | ${{ parameters.project }}'
-#    restoreKeys: |
-#      maven | "$(Agent.OS)"
-#      maven
-#    path: $(MAVEN_CACHE_FOLDER)
+- task: CacheBeta@0
+  displayName: Cache Maven local repo
+  inputs:
+    key: 'maven | "$(Agent.OS)" | $(mavenPomFile)'
+    restoreKeys: |
+      maven | "$(Agent.OS)"
+      maven
+    path: $(MAVEN_CACHE_FOLDER)
 - task: Maven@3
   displayName: Build function
   inputs:
@@ -35,7 +35,7 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     goals: 'package'
-    options: '--batch-mode'
+    options: '--batch-mode -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 #    options: '$(MAVEN_OPTS)'
 
 - task: ArchiveFiles@2
