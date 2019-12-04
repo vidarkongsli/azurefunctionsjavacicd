@@ -50,6 +50,9 @@ steps:
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip' 
 
+- publish: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip'
+  artifact: FunctionApp
+
 - task: AzureResourceGroupDeployment@2
   displayName: Provision Azure infrastructure
   inputs:
