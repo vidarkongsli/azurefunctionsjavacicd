@@ -57,7 +57,7 @@ stages:
 
     - publish: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip'
       artifact: FunctionApp
-      name: Publish build artifacts
+      displayName: Publish build artifacts
 
 - stage:
   displayName: Deploy
@@ -68,6 +68,7 @@ stages:
     steps:
     - download: current
       artifact: FunctionApp
+      displayName: Download function package
 
     - task: AzureResourceGroupDeployment@2
       displayName: Provision Azure infrastructure
