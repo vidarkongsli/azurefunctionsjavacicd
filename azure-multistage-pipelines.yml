@@ -12,62 +12,78 @@ trigger:
     include:
       - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+stages:
 
-steps:
-- task: CacheBeta@0
-  displayName: Cache Maven local repo
-  inputs:
-    key: 'maven | "$(Agent.OS)" | $(mavenPomFile)'
-    restoreKeys: |
-      maven | "$(Agent.OS)"
-      maven
-    path: $(MAVEN_CACHE_FOLDER)
+- stage:
+  name: Build
+  jobs:
+  - job:
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: CacheBeta@0
+      displayName: Cache Maven local repo
+      inputs:
+        key: 'maven | "$(Agent.OS)" | $(mavenPomFile)'
+        restoreKeys: |
+          maven | "$(Agent.OS)"
+          maven
+        path: $(MAVEN_CACHE_FOLDER)
 
-- task: Maven@3
-  displayName: Build function
-  inputs:
-    mavenPomFile: $(mavenPomFile)
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: false
-    testResultsFiles: '**/TEST-*.xml'
-    goals: 'package'
-    options: '--batch-mode -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+    - task: Maven@3
+      displayName: Build function
+      inputs:
+        mavenPomFile: $(mavenPomFile)
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.8'
+        jdkArchitectureOption: 'x64'
+        publishJUnitResults: false
+        testResultsFiles: '**/TEST-*.xml'
+        goals: 'package'
+        options: '--batch-mode -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
-- task: PublishTestResults@2
-  displayName: Publish test results
-  inputs:
-    testResultsFiles: '**/TEST-*.xml'
+    - task: PublishTestResults@2
+      displayName: Publish test results
+      inputs:
+        testResultsFiles: '**/TEST-*.xml'
 
-- task: ArchiveFiles@2
-  displayName: Create zipped package
-  inputs:
-    rootFolderOrFile: 'target/azure-functions/$(funcAppName)'
-    includeRootFolder: false 
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip' 
+    - task: ArchiveFiles@2
+      displayName: Create zipped package
+      inputs:
+        rootFolderOrFile: 'target/azure-functions/$(funcAppName)'
+        includeRootFolder: false 
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip' 
 
-- publish: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip'
-  artifact: FunctionApp
+    - publish: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip'
+      artifact: FunctionApp
+      name: Publish build artifacts
 
-- task: AzureResourceGroupDeployment@2
-  displayName: Provision Azure infrastructure
-  inputs:
-    action: Create Or Update Resource Group
-    location: $(location)
-    azureSubscription: $(serviceConnection)
-    resourceGroupName: '$(funcAppName)-rg'
-    templateLocation: Linked artifact
-    csmFile: 'azuredeploy.json'
-    csmParametersFile: 'azuredeploy.parameters.json'
+- stage:
+  name: Deploy
+  jobs:
+  - job:
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - download: current
+      artifact: FunctionApp
 
-- task: AzureFunctionApp@1
-  displayName: Deploy function app
-  inputs:
-    azureSubscription: $(serviceConnection)
-    appType: functionApp
-    appName: $(funcAppName)
-    package: '$(Build.ArtifactStagingDirectory)/$(funcAppName)$(Build.BuildId).zip'
+    - task: AzureResourceGroupDeployment@2
+      displayName: Provision Azure infrastructure
+      inputs:
+        action: Create Or Update Resource Group
+        location: $(location)
+        azureSubscription: $(serviceConnection)
+        resourceGroupName: '$(funcAppName)-rg'
+        templateLocation: Linked artifact
+        csmFile: 'azuredeploy.json'
+        csmParametersFile: 'azuredeploy.parameters.json'
+
+    - task: AzureFunctionApp@1
+      displayName: Deploy function app
+      inputs:
+        azureSubscription: $(serviceConnection)
+        appType: functionApp
+        appName: $(funcAppName)
+        package: '$(Pipeline.Workspace)/FunctionApp/$(funcAppName)$(Build.BuildId).zip'
